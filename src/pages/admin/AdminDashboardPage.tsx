@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +11,43 @@ import { Users, BookOpen, FileText, HelpCircle, ShoppingCart, DollarSign, Trendi
 import { cn } from '@/lib/utils';
 
 export default function AdminDashboardPage() {
+  const hasLoadedRef = useRef(false);
   const [stats, setStats] = useState({ users: 0, subjects: 0, exams: 0, questions: 0, pendingOrders: 0, totalRevenue: 0 });
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [userGrowth, setUserGrowth] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadStats(); }, []);
+  useEffect(() => {
+    // Only load data once when component mounts
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadStats();
+    }
+  }, []);
 
   const loadStats = async () => {
+    // Check if cached data is still fresh (10 minutes for admin dashboard)
+    const cacheKey = 'admin_dashboard_cache';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const cacheData = JSON.parse(cached);
+        const isExpired = Date.now() - cacheData.timestamp > 10 * 60 * 1000; // 10 minutes
+        if (!isExpired && cacheData.stats) {
+          // Use cached data
+          setStats(cacheData.stats);
+          setRecentOrders(cacheData.recentOrders);
+          setRevenueData(cacheData.revenueData);
+          setUserGrowth(cacheData.userGrowth);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.log('Cache load failed, fetching fresh data');
+      }
+    }
+
     setLoading(true);
     const [u, s, e, q, o, r, recentO, userR] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
@@ -48,7 +76,7 @@ export default function AdminDashboardPage() {
       const key = d.toLocaleDateString('vi', { month: 'short', day: 'numeric' });
       if (revMap[key] !== undefined) revMap[key] += Number(o.total_price);
     });
-    setRevenueData(Object.entries(revMap).map(([date, amount]) => ({ date, amount })));
+    const newRevenueData = Object.entries(revMap).map(([date, amount]) => ({ date, amount }));
 
     // User growth — last 7 days
     const ugMap: Record<string, number> = {};
@@ -63,10 +91,26 @@ export default function AdminDashboardPage() {
       const key = d.toLocaleDateString('vi', { weekday: 'short' });
       if (ugMap[key] !== undefined) ugMap[key]++;
     });
-    setUserGrowth(Object.entries(ugMap).map(([day, count]) => ({ day, count })));
+    const newUserGrowth = Object.entries(ugMap).map(([day, count]) => ({ day, count }));
 
-    setStats({ users: u.count || 0, subjects: s.count || 0, exams: e.count || 0, questions: q.count || 0, pendingOrders: o.count || 0, totalRevenue });
-    setRecentOrders(recentO.data || []);
+    const newStats = { users: u.count || 0, subjects: s.count || 0, exams: e.count || 0, questions: q.count || 0, pendingOrders: o.count || 0, totalRevenue };
+    const newRecentOrders = recentO.data || [];
+
+    setStats(newStats);
+    setRecentOrders(newRecentOrders);
+    setRevenueData(newRevenueData);
+    setUserGrowth(newUserGrowth);
+
+    // Save to cache
+    const cacheData = {
+      stats: newStats,
+      recentOrders: newRecentOrders,
+      revenueData: newRevenueData,
+      userGrowth: newUserGrowth,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+
     setLoading(false);
   };
 
