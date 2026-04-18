@@ -69,4 +69,31 @@ app.use((err, req, res, next) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Serving files from: ${distPath}`);
+=======
+// Serve static files with correct MIME types
+app.use(
+  express.static(distPath, {
+    setHeaders: (res, path) => {
+      // Explicit MIME types
+      if (path.endsWith(".css")) {
+        res.setHeader("Content-Type", "text/css; charset=utf-8");
+      } else if (path.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+      } else if (path.endsWith(".json")) {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+      }
+    },
+    maxAge: "1d",
+    etag: false,
+  }),
+);
+
+// SPA fallback - serve index.html for all non-file routes
+app.get("*", (req, res) => {
+  res.sendFile(join(distPath, "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+>>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
 });
