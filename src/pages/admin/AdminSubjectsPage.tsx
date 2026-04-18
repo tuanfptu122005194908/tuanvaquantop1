@@ -9,11 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-<<<<<<< HEAD
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, BookOpen, GraduationCap, Upload, X, Copy } from 'lucide-react';
-=======
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, BookOpen, GraduationCap, Upload, X } from 'lucide-react';
->>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
 import { cn } from '@/lib/utils';
 
 const KI_COLORS: Record<number, string> = {
@@ -37,7 +33,6 @@ export default function AdminSubjectsPage() {
   const [catForm, setCatForm] = useState({ name: '', description: '', subject_id: 0, order_index: 1 });
   const [showForm, setShowForm] = useState(false);
   const [showCatForm, setShowCatForm] = useState(false);
-<<<<<<< HEAD
   const [showCopyDialog, setShowCopyDialog] = useState(false);
   const [copySubject, setCopySubject] = useState<any>(null);
   const [copyOptions, setCopyOptions] = useState({
@@ -47,8 +42,6 @@ export default function AdminSubjectsPage() {
   });
   const [copyForm, setCopyForm] = useState({ name: '', description: '', order_index: 1 });
   const [copying, setCopying] = useState(false);
-=======
->>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
   const [expanded, setExpanded] = useState<number | null>(null);
 
   useEffect(() => { loadData(); }, []);
@@ -141,7 +134,6 @@ export default function AdminSubjectsPage() {
     loadData();
   };
 
-<<<<<<< HEAD
   const openCopyDialog = (subject: any) => {
     setCopySubject(subject);
     setCopyForm({ 
@@ -391,8 +383,6 @@ export default function AdminSubjectsPage() {
     }
   };
 
-=======
->>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
   // Group subjects by order_index (kì học)
   const kiGroups: Record<number, any[]> = {};
   subjects.forEach(s => {
@@ -502,13 +492,10 @@ export default function AdminSubjectsPage() {
                               }}>
                               <Pencil className="h-3 w-3" />
                             </Button>
-<<<<<<< HEAD
                             <Button size="sm" variant="ghost"
                               onClick={() => openCopyDialog(s)}>
                               <Copy className="h-3 w-3" />
                             </Button>
-=======
->>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
                             <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10"
                               onClick={() => deleteSubject(s.id)}>
                               <Trash2 className="h-3 w-3" />
@@ -708,7 +695,6 @@ export default function AdminSubjectsPage() {
           </div>
         </DialogContent>
       </Dialog>
-<<<<<<< HEAD
 
       {/* Copy Subject Dialog */}
       <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
@@ -821,8 +807,6 @@ export default function AdminSubjectsPage() {
           </div>
         </DialogContent>
       </Dialog>
-=======
->>>>>>> 8574b7b944667322ca14839167be6fec5754fd20
     </div>
   );
 }
