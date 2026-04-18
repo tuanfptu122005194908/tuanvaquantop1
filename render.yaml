@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: tqmaster
+    env: node
+    buildCommand: npm run build
+    startCommand: node server.js
+    nodeVersion: 22
+    envVars:
+      - key: NODE_ENV
+        value: production
